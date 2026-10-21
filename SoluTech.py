@@ -5,9 +5,13 @@
 import json
 import os
 
-ARQUIVO = "caixas.json"
+ARQUIVO_CAIXAS = "caixas.json"
+ARQUIVO_PRODUTOS = "produtos.json"
 
-# Banco de dados dos produtos
+# ==========================================
+# BANCO DE DADOS DOS PRODUTOS
+# ==========================================
+
 produtos = {
     "1001": {
         "nome": "Arroz",
@@ -31,23 +35,39 @@ caixas = {}
 
 
 # ==========================================
-# SALVAR E CARREGAR OS DADOS
+# SALVAR E CARREGAR DADOS
 # ==========================================
 
 def salvar_caixas():
-    with open(ARQUIVO, "w", encoding="utf-8") as arquivo:
+    with open(ARQUIVO_CAIXAS, "w", encoding="utf-8") as arquivo:
         json.dump(caixas, arquivo, ensure_ascii=False, indent=4)
 
 
 def carregar_caixas():
     global caixas
 
-    if os.path.exists(ARQUIVO):
+    if os.path.exists(ARQUIVO_CAIXAS):
         try:
-            with open(ARQUIVO, "r", encoding="utf-8") as arquivo:
+            with open(ARQUIVO_CAIXAS, "r", encoding="utf-8") as arquivo:
                 caixas = json.load(arquivo)
         except (json.JSONDecodeError, OSError):
             caixas = {}
+
+
+def salvar_produtos():
+    with open(ARQUIVO_PRODUTOS, "w", encoding="utf-8") as arquivo:
+        json.dump(produtos, arquivo, ensure_ascii=False, indent=4)
+
+
+def carregar_produtos():
+    global produtos
+
+    if os.path.exists(ARQUIVO_PRODUTOS):
+        try:
+            with open(ARQUIVO_PRODUTOS, "r", encoding="utf-8") as arquivo:
+                produtos = json.load(arquivo)
+        except (json.JSONDecodeError, OSError):
+            print("Erro ao carregar produtos. Usando os produtos iniciais.")
 
 
 # ==========================================
@@ -69,7 +89,7 @@ def criar_caixa():
 
     caixas[codigo_caixa] = []
 
-    print("\nCaixa", codigo_caixa, "criada!")
+    print("Caixa", codigo_caixa, "criada!")
 
     while True:
         codigo_produto = input(
@@ -87,7 +107,7 @@ def criar_caixa():
             quantidade = int(input("Digite a quantidade: "))
 
             if quantidade <= 0:
-                print("A quantidade deve ser maior que zero.")
+                print("A quantidade deve ser maior que zero!")
                 continue
 
         except ValueError:
@@ -172,21 +192,63 @@ def excluir_caixa():
 
 
 # ==========================================
+# 4. CADASTRAR PRODUTO
+# ==========================================
+
+def cadastrar_produto():
+    print("\n===== CADASTRO DE PRODUTO =====")
+
+    codigo = input("Bipe o código do produto: ").strip()
+
+    if not codigo:
+        print("Código inválido!")
+        return
+
+    if codigo in produtos:
+        print("Esse produto já está cadastrado!")
+        return
+
+    nome = input("Nome do produto: ").strip()
+    lote = input("Lote do produto: ").strip()
+    validade = input("Validade (MM/AAAA): ").strip()
+
+    if not nome or not lote or not validade:
+        print("Todos os campos são obrigatórios!")
+        return
+
+    produtos[codigo] = {
+        "nome": nome,
+        "lote": lote,
+        "validade": validade
+    }
+
+    salvar_produtos()
+
+    print("\nProduto cadastrado com sucesso!")
+    print("Código:", codigo)
+    print("Nome:", nome)
+    print("Lote:", lote)
+    print("Validade:", validade)
+
+
+# ==========================================
 # MENU PRINCIPAL
 # ==========================================
 
 def menu():
     carregar_caixas()
+    carregar_produtos()
 
     while True:
-        print("\n================================")
-        print(" SISTEMA DE CONTROLE DE CAIXAS")
-        print("================================")
+        print("\n===================================")
+        print("   SISTEMA DE CONTROLE DE CAIXAS")
+        print("===================================")
         print("1 - Cadastrar caixa")
         print("2 - Consultar caixas e materiais")
         print("3 - Excluir caixa")
+        print("4 - Cadastrar produto")
         print("0 - Sair")
-        print("================================")
+        print("===================================")
 
         opcao = input("Escolha uma opção: ").strip()
 
@@ -199,6 +261,9 @@ def menu():
         elif opcao == "3":
             excluir_caixa()
 
+        elif opcao == "4":
+            cadastrar_produto()
+
         elif opcao == "0":
             print("Saindo do sistema. Até mais!")
             break
@@ -208,7 +273,7 @@ def menu():
 
 
 # ==========================================
-# EXECUTAR O SISTEMA
+# INICIAR O SISTEMA
 # ==========================================
 
 if __name__ == "__main__":
